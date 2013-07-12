@@ -22,14 +22,14 @@
  *
  *  * Create a datasource in your config/database.php
  *  public $wordpress = array(
- *	'datasource' => 'WordpressSource.WordpressSource',
- *	'host' => 'example.com',
- *	'path' => '/xml-rpc.php',
- *	'port' => 80,
- *	'timeout' => 15,
- *	'username' => null,
- *	'password' => null,
- *	'blog_id' => 0
+ * 	'datasource' => 'WordpressSource.WordpressSource',
+ * 	'host' => 'example.com',
+ * 	'path' => '/xml-rpc.php',
+ * 	'port' => 80,
+ * 	'timeout' => 15,
+ * 	'username' => null,
+ * 	'password' => null,
+ * 	'blog_id' => 0
  *  );
  *
  */
@@ -126,21 +126,21 @@ class WordpressSource extends DataSource {
 		'menu_order' => array('type' => 'integer', 'null' => false, 'default' => '0'),
 		'comment_status' => array('type' => 'string', 'null' => false, 'default' => 'open', 'length' => 20, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'ping_status' => array('type' => 'string', 'null' => false, 'default' => 'open', 'length' => 20, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-		//sticky ?
-		/*
-		'to_ping' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-		'pinged' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-		'post_content_filtered' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-		'comment_count' => array('type' => 'biginteger', 'null' => false, 'default' => '0'),
-		'indexes' => array(
-		    'PRIMARY' => array('column' => 'ID', 'unique' => 1),
-		    'post_name' => array('column' => 'post_name', 'unique' => 0),
-		    'type_status_date' => array('column' => array('post_type', 'post_status', 'post_date', 'ID'), 'unique' => 0),
-		    'post_parent' => array('column' => 'post_parent', 'unique' => 0),
-		    'post_author' => array('column' => 'post_author', 'unique' => 0)
-		),
-		'tableParameters' => array('charset' => 'utf8', 'collate' => 'utf8_general_ci', 'engine' => 'InnoDB'),
-		*/
+	    //sticky ?
+	    /*
+	      'to_ping' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
+	      'pinged' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
+	      'post_content_filtered' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
+	      'comment_count' => array('type' => 'biginteger', 'null' => false, 'default' => '0'),
+	      'indexes' => array(
+	      'PRIMARY' => array('column' => 'ID', 'unique' => 1),
+	      'post_name' => array('column' => 'post_name', 'unique' => 0),
+	      'type_status_date' => array('column' => array('post_type', 'post_status', 'post_date', 'ID'), 'unique' => 0),
+	      'post_parent' => array('column' => 'post_parent', 'unique' => 0),
+	      'post_author' => array('column' => 'post_author', 'unique' => 0)
+	      ),
+	      'tableParameters' => array('charset' => 'utf8', 'collate' => 'utf8_general_ci', 'engine' => 'InnoDB'),
+	     */
 	    ),
 	    'taxonomies',
 	    'comments',
@@ -245,7 +245,7 @@ class WordpressSource extends DataSource {
 	}
 
 	/**
-	 * Perform a XML RPC call
+	 * Perform an XML RPC call
 	 *
 	 * @param string $method compatible XML-RPC WordPress API method
 	 * @param array $params parameters to query
@@ -294,4 +294,142 @@ class WordpressSource extends DataSource {
 		throw new CacheException($errmsg, $errno);
 		return false;
 	}
+
+	/**
+	 * Helper functions
+	 *
+	 * Apparently if you pass an empty array of $fields you get only the post_id.
+	 * Also, if you pass a null value of $fields you get parse error
+	 */
+
+	/**
+	 * Retrieve a post of any registered post type
+	 *
+	 * @link http://codex.wordpress.org/XML-RPC_WordPress_API/Posts#wp.getPost
+	 * @param integer $post_id
+	 * @param array $fields Optional list of field or meta-field names to include in response.
+	 * @return mixed Response of Wordpress XML-RPC Server. If return false, $this->error contain a error message.
+	 */
+	public function getPost($post_id, array $fields = array()) {
+		if ($fields) {
+			return $this->query('wp.getPost', $post_id, $fields);
+		} else {
+			return $this->query('wp.getPost', $post_id);
+		}
+	}
+
+	/**
+	 * Retrieve list of posts of any registered post type
+	 * NOTE: Response will only contain posts that the user has permission to edit. Therefore, there may be fewer than filter['number'] posts in the response.
+	 *
+	 * The $filter array follows this structure:
+	 * string post_type
+	 * string post_status
+	 * integer number
+	 * integer offset
+	 * string orderby
+	 * string order
+	 *
+	 * @link http://codex.wordpress.org/XML-RPC_WordPress_API/Posts#wp.getPosts
+	 * @param array $filter Optional filters. When none are set ( an empty array ) all posts are returned
+	 * @param array $fields Optional list of field or meta-field names to include in response.
+	 * @return mixed Response of Wordpress XML-RPC Server. If return false, $this->error contain a error message.
+	 */
+	public function getPosts(array $filter = array(), array $fields = array()) {
+		if ($fields) {
+			return $this->query('wp.getPosts', $filter, $fields);
+		} else {
+			return $this->query('wp.getPosts', $filter);
+		}
+	}
+
+	/**
+	 * Create a new post of any registered post type
+	 *
+	 * The $post array follows this structure:
+	 * array $content
+	 * string $post_type
+	 * string $post_status
+	 * string $post_title
+	 * integer $post_author
+	 * string $post_excerpt
+	 * string $post_content
+	 * datetime $post_date_gmt | $post_date
+	 * string $post_format
+	 * string $post_name
+	 * string $post_password
+	 * string $comment_status
+	 * string $ping_status
+	 * bool $sticky
+	 * integer $post_thumbnail
+	 * integer $post_parent
+	 * array $custom_fields
+	 * 	string $key
+	 * 	string $value
+	 * array $terms: Taxonomy names as keys, array of term IDs as values.
+	 * array $terms_names: Taxonomy names as keys, array of term names as values.
+	 * array $enclosure
+	 * string $url
+	 * integer $length
+	 * string $type
+	 *
+	 * @link http://codex.wordpress.org/XML-RPC_WordPress_API/Posts#wp.newPost
+	 * @param array $post
+	 * @return string $post_id the newly created post id
+	 */
+	public function newPost(array $post) {
+		$post_id = $this->query('wp.newPost', $post);
+		return $post_id;
+	}
+
+	/**
+	 * Edit an existing post of any registered post type
+	 *
+	 * The $post array follows this structure:
+	 * array $content
+	 * string $post_type
+	 * string $post_status
+	 * string $post_title
+	 * integer $post_author
+	 * string $post_excerpt
+	 * string $post_content
+	 * datetime $post_date_gmt | $post_date
+	 * string $post_format
+	 * string $post_name
+	 * string $post_password
+	 * string $comment_status
+	 * string $ping_status
+	 * bool $sticky
+	 * integer $post_thumbnail
+	 * integer $post_parent
+	 * array $custom_fields
+	 * 	string $key
+	 * 	string $value
+	 * array $terms: Taxonomy names as keys, array of term IDs as values.
+	 * array $terms_names: Taxonomy names as keys, array of term names as values.
+	 * array $enclosure
+	 * string $url
+	 * integer $length
+	 * string $type
+	 *
+	 * @link http://codex.wordpress.org/XML-RPC_WordPress_API/Posts#wp.editPost
+	 * @param string $post_id
+	 * @param array $post
+	 * @return bool true
+	 */
+	public function editPost($post_id, array $post) {
+		return $this->query('wp.editPost', $post_id, $post);
+	}
+
+	/**
+	 * Delete an existing post of any registered post type
+	 *
+	 * @link http://codex.wordpress.org/XML-RPC_WordPress_API/Posts#wp.deletePost
+	 * @param integer $post_id
+	 * @return bool true
+	 */
+	public function deletePost($post_id) {
+		return $this->query('wp.deletePost', $post_id);
+	}
+
 }
