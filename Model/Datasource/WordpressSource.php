@@ -211,8 +211,6 @@ class WordpressSource extends DataSource {
 	 * Gets full table name including prefix
 	 *
 	 * @param Model|string $model Either a Model object or a string table name.
-	 * @param boolean $quote Whether you want the table name quoted.
-	 * @param boolean $schema Whether you want the schema name included.
 	 * @return string Full quoted table name
 	 */
 	public function fullTableName($model) {
@@ -225,6 +223,18 @@ class WordpressSource extends DataSource {
 	}
 
 	/**
+	 * Get the function name based on the table name
+	 *
+	 * @param Model|string $model Either a Model object or a string table name.
+	 * @return string Full quoted table name
+	 */
+	protected function _functionName($model) {
+		$table = $this->fullTableName($model);
+		$func = 'get' . ucfirst(Inflector::pluralize($table));
+		return $func;
+	}
+
+	/**
 	 * Returns an array of the fields in given table name.
 	 *
 	 * @param Model|string $model Name of database table to inspect or model instance
@@ -234,6 +244,46 @@ class WordpressSource extends DataSource {
 	public function describe($model) {
 		$table = $this->fullTableName($model);
 		return $this->_sources[$table];
+	}
+
+	/**
+	 * Implement the R in CRUD. Calls to ``Model::find()`` arrive here.
+	 */
+	public function read(Model $model, $queryData = array(), $recursive = null) {
+		$func = $this->_functionName($model);
+		if (!method_exists($this, $func)) {
+			throw new CakeException('Unkwon function ' . $func . ' by the model ' . $model->name);
+		}
+		$args = func_get_args();
+		array_shift($args);
+		pr($args);
+
+		$filter = (array)$queryData['conditions'];
+		if ($queryData['fields'] === 'COUNT' || $model->findQueryType == 'count') {
+			$fields = array($model->primaryKey);
+		} else {
+			$fields = (array)$queryData['fields'];
+			$filter['number'] = $queryData['limit'];
+			$filter['offset'] = $queryData['offset'];
+			if (count($queryData['order']) && $order = array_shift($queryData['order'])) {
+				$filter['orderby'] = key($order);
+				$filter['order'] = reset($order);
+			}
+		}
+		$response = call_user_func(array($this, $func), $filter, $fields);
+		pr($filter);
+		pr($response);
+		die;
+		if ($response === false) {
+			return false;
+		} elseif (count($response) == 0) {
+			return array($model->alias => array());
+		}
+		$result = array();
+		foreach ($response as $row) {
+			$result[][$model->alias] = $this->parseResponse($row);
+		}
+		return $result;
 	}
 
 	/**

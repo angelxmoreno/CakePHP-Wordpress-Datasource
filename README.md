@@ -24,6 +24,7 @@ More functions coming soon. I plan to have all the methods in http://codex.wordp
 ## Requirements ##
 * PHP version: PHP 5.2+
 * CakePHP version: Cakephp 2.x
+* Wordpress 3.5+ Installation
 
 ## Installation ##
 1. Copy the plugin to your application plugins folder. Make sure the directory name is "WordpressSource"
@@ -64,4 +65,13 @@ More functions coming soon. I plan to have all the methods in http://codex.wordp
         debug($res);
 
 ## Branch Strategy ##
-Branch is currently unstable. Once I work out the kinks in the Post model I'll create a development branch.
+Master is currently stable. When submitting PRs, please use the development branch.
+
+## API limitations ##
+I decided to document the many limitations of the XML-RPC API with possible workarounds. I ask the community to please amend to this section any other limitations or solutions.
+
+1. The API does not allow you to fetch a count of posts.
+* Solution 1: when the Datasource calls for a count, set the 'number' parameter in the filters to 999,999. This itself sounds like a horrible idea and performances test will need to be done.
+* Solution 2: when the Datasource calls for a count, set the 'number' parameter to a reasonable number and make multiple calls to get the total number.
+* Solution 3: submit a PR to the codebase to add this obviously useful functionality
+* Solution 4: create a Wordpress plugin that extends the XML-RPC API (http://codex.wordpress.org/XML-RPC_Extending)
