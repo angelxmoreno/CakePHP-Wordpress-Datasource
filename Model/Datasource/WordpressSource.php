@@ -106,45 +106,37 @@ class WordpressSource extends DataSource {
 	protected $_sources = array(
 	    'posts' => array(
 		'post_id' => array('type' => 'biginteger', 'null' => false, 'default' => null, 'key' => 'primary'),
-		'post_title' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
+		'post_title' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8', 'unique' => 1),
 		'post_date' => array('type' => 'datetime', 'null' => false, 'default' => '0000-00-00 00:00:00'),
 		'post_date_gmt' => array('type' => 'datetime', 'null' => false, 'default' => '0000-00-00 00:00:00'),
 		'post_modified' => array('type' => 'datetime', 'null' => false, 'default' => '0000-00-00 00:00:00'),
 		'post_modified_gmt' => array('type' => 'datetime', 'null' => false, 'default' => '0000-00-00 00:00:00'),
 		'post_status' => array('type' => 'string', 'null' => false, 'default' => 'publish', 'length' => 20, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'post_type' => array('type' => 'string', 'null' => false, 'default' => 'post', 'length' => 20, 'key' => 'index', 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-		//post_format ?
 		'post_name' => array('type' => 'string', 'null' => false, 'length' => 200, 'key' => 'index', 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-		'post_author' => array('type' => 'biginteger', 'null' => false, 'default' => '0', 'key' => 'index'),
+		'post_author' => array('type' => 'biginteger', 'null' => false, 'default' => 0, 'key' => 'index'),
 		'post_password' => array('type' => 'string', 'null' => false, 'length' => 20, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'post_excerpt' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'post_content' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-		'post_parent' => array('type' => 'biginteger', 'null' => false, 'default' => '0', 'key' => 'index'),
+		'post_parent' => array('type' => 'biginteger', 'null' => false, 'default' => 0, 'key' => 'index'),
 		'post_mime_type' => array('type' => 'string', 'null' => false, 'length' => 100, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-		//link ?
+		'link' => array('type' => 'string', 'null' => false, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'guid' => array('type' => 'string', 'null' => false, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-		'menu_order' => array('type' => 'integer', 'null' => false, 'default' => '0'),
+		'menu_order' => array('type' => 'integer', 'null' => false, 'default' => 0),
 		'comment_status' => array('type' => 'string', 'null' => false, 'default' => 'open', 'length' => 20, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'ping_status' => array('type' => 'string', 'null' => false, 'default' => 'open', 'length' => 20, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-	    //sticky ?
-	    /*
-	      'to_ping' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-	      'pinged' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-	      'post_content_filtered' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
-	      'comment_count' => array('type' => 'biginteger', 'null' => false, 'default' => '0'),
-	      'indexes' => array(
-	      'PRIMARY' => array('column' => 'ID', 'unique' => 1),
-	      'post_name' => array('column' => 'post_name', 'unique' => 0),
-	      'type_status_date' => array('column' => array('post_type', 'post_status', 'post_date', 'ID'), 'unique' => 0),
-	      'post_parent' => array('column' => 'post_parent', 'unique' => 0),
-	      'post_author' => array('column' => 'post_author', 'unique' => 0)
-	      ),
-	      'tableParameters' => array('charset' => 'utf8', 'collate' => 'utf8_general_ci', 'engine' => 'InnoDB'),
-	     */
+		'sticky' => array('type' => 'smallint', 'null' => false, 'default' => 0, 'length' => 1, 'key' => 'index'),
+		'post_format' => array('type' => 'string', 'null' => false, 'length' => 20, 'collate' => 'utf8_general_ci', 'charset' => 'utf8', 'key' => 'index', 'default' => 'standard'),
 	    ),
+		/*
+	    'terms',
+	    'custom_fields',
+	    'post_thumbnail',
 	    'taxonomies',
 	    'comments',
 	    'users'
+	     *
+	     */
 	);
 
 	/**
