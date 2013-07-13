@@ -24,6 +24,7 @@ More functions coming soon. I plan to have all the methods in http://codex.wordp
 ## Requirements ##
 * PHP version: PHP 5.2+
 * CakePHP version: Cakephp 2.x
+* Wordpress 3.5+ Installation
 
 ## Installation ##
 1. Copy the plugin to your application plugins folder. Make sure the directory name is "WordpressSource"
@@ -64,4 +65,20 @@ More functions coming soon. I plan to have all the methods in http://codex.wordp
         debug($res);
 
 ## Branch Strategy ##
-Branch is currently unstable. Once I work out the kinks in the Post model I'll create a development branch.
+Master is currently stable. Refer to status for working functionalities. When submitting PRs, please use the development branch.
+
+## API limitations ##
+I decided to document the many limitations of the XML-RPC API with possible workarounds. I ask the community to please amend to this section any other limitations or solutions.
+
+1. The API does not allow you to fetch a count of posts.
+    * Solution 1: when the Datasource calls for a count, set the 'number' parameter in the filters to 999,999. This itself sounds like a horrible idea and performances test will need to be done.
+    * Solution 2: when the Datasource calls for a count, set the 'number' parameter to a reasonable number and make multiple calls to get the total number.
+    * Solution 3: submit a PR to the codebase to add this obviously useful functionality
+    * Solution 4: create a Wordpress plugin that extends the XML-RPC API (http://codex.wordpress.org/XML-RPC_Extending)
+    * Solution 5: use the Datasource to sync with a local database that would be more flexible using a DBOsource
+
+1. The API does not allow you to filter by columns outside the documented columns (http://codex.wordpress.org/XML-RPC_WordPress_API/Posts#Parameters_2). Currently, all "non-registered" columns are simply ignored by the API.
+    * Solution 1: once we get a response, we can filter the array. We would also have to implement a proper  "count" override since the count of data coming from the API would no longer be the sane as what the datasource returns.
+    * Solution 2: submit a PR to the codebase to add this obviously useful functionality
+    * Solution 3: create a Wordpress plugin that extends the XML-RPC API (http://codex.wordpress.org/XML-RPC_Extending)
+    * Solution 4: use the Datasource to sync with a local database that would be more flexible using a DBOsource
